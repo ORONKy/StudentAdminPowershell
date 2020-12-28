@@ -13,17 +13,27 @@ function importSchuelerToDB {
 
         try {
             $getDbStudent = runSql $database $querry
+            return
         }
         catch {
             $getDbStudent
         }
-        if (!$getDbStudent) {
-            $addquerry = "INSERT INTO schueler username, id, name, vorname, geburtsdatum, kurzel, mail 
-            VALUES " + $student.username +","+$student.id+","+$student.name+","+$student.vorname+","+$student.kuerzel+","+$student.mail+";"
-            
+        if (!$getDbStudent -and $student.status -eq 1) {
+            $addquerry = "INSERT INTO schueler(username, id, name, vorname, geburtsdatum, kuerzel, mail) VALUES ('$($student.username)', '$($student.id)', '$($student.name)', '$($student.vorname)','$($student.geburtsdatum)', '$($student.kuerzel)', '$($student.mail)')"
+            #TODO need logger
             runSql $database $addquerry
+            $student.profile.profile
         }
     }
+}
+
+function addClassAndGetId {
+    param (
+        [string]$database,
+        [string]$class
+    )
+    $checkquerry = "SELECT * FROM klasse where "
+    
 }
 
 $scoolData = readXmlGetStudent
