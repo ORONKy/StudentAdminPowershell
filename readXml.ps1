@@ -1,8 +1,8 @@
-
+. .\GlobalVariables.ps1
 
 function readXmlGetStudent {
     param (
-        [string]$xmlPath = ".\ressources\gibsso_AD-Export.xml"
+        [string]$xmlPath = $GlobalXmlPath
     )
     [xml]$xmlScoolData = Get-Content -Path $xmlPath
     return $xmlScoolData
