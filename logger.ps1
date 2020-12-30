@@ -1,11 +1,5 @@
 . .\GlobalVariables.ps1
 
-enum enumLogTypes {
-    information = "INFO"
-    warning = "WARN"
-    error = "ERROR"
-
-}
 function log {
     param(
         [Parameter()]
@@ -17,9 +11,11 @@ function log {
         [ValidateSet('INFO','WARN','ERROR')]
         [string]$type
     )
-    [logdata]@{
+
+    [pscustomobject]@{
         Time = (Get-Date -f g)
         Type = $type
         Message = $Message
-    } | Export-Csv -Path "$logPath\LogFile.csv" -Append -NoTypeInformation
+    } | Export-Csv -Path $GlobalLogPath"\LogFile.csv" -Append
 }
+log "test log" "INFO"
