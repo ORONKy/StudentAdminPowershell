@@ -64,11 +64,12 @@ function addClass {
         else {
             $classDBid = $class[0]
         }
+        #test studentDBid
         runSql $database "INSERT INTO ``schueler-klasse``(sid, kid) VALUES ('$($studentDBid[0])', '$($classDBid[0])')"
-        log "student addet to class, student: $studentDBid, class: $classDBid"
+        log "student addet to class, student: $studentDBid, class: $classDBid" "INFO"
     }
     
 }
 
-$scoolData = readXmlGetStudent
+$scoolData = readXml
 importSchuelerToDB $scoolData "m122projekt"
