@@ -18,4 +18,3 @@ function log {
         Message = $Message
     } | Export-Csv -Path $GlobalLogPath"\LogFile.csv" -Append
 }
-log "test log" "INFO"
