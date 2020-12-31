@@ -27,71 +27,45 @@ function importSchuelerToDB {
                 $addquerry = "INSERT INTO schueler(username, id, name, vorname, geburtsdatum, kuerzel, mail) VALUES ('$($student.username)', '$($student.id)', '$($studentName)', '$($studentFirstname)','$($student.geburtsdatum)', '$($student.kuerzel)', '$($student.mail)')"
                 runSql $database $addquerry
                 log "Student addet to db id: $($student.id)" "INFO"
-                $studentDBid
+                $studentDBid = runSql $database "SELECT LAST_INSERT_ID()"
+
                 $mainclass = $student.profile.profil.stammklasse
-
-
                 if($mainclass){
-                    try {
-                        $class = runSql $database "select * from klasse where klassenbezeichnung = $($mainclass)"
-                    }
-                    catch {
-                        $class
-                    }
-                    if (!$class) {
-                        $studentDBid = runSql $database "SELECT LAST_INSERT_ID()"
-                        runSql $database "INSERT INTO klasse(klassenbezeichnung) VALUES ('$($mainclass)')"
-                        log "New Class created name: "$mainclass "INFO"
-                        $classDBid = runSql $database "SELECT LAST_INSERT_ID()"
-                    }
-                    else {
-                        $classDBid = $class[0]
-                    }
-                    runSql $database "INSERT INTO ``schueler-klasse``(sid, kid) VALUES ('$($studentDBid[0])', '$($classDBid[0])')"
-                    log "student added to class, student: "$studentDBid[0]", class: $classDBid[0]"
-            }
-            $secondclass = $student.profile.profil.zweitausbildung_stammklasse
-            if($secondclass){
-                try {
-                    $secclass = runSql $database "select * from klasse where klassenbezeichnung = $($secondclass)"
+                    addClass $studentDBid $mainclass
                 }
-                catch {
-                    $secclass
+
+                $secondclass = $student.profile.profil.zweitausbildung_stammklasse
+                if($secondclass){
+                    addClass $studentDBid $secondclass
                 }
-                if (!$class) {
-                    runSql $database "INSERT INTO klasse(klassenbezeichnung) VALUES ('$($mainclass)')"
-                    $classDBid = runSql $database "SELECT LAST_INSERT_ID()"
-                }
-                else {
-                    $classDBid = $secclass[0]
-                }
-                runSql $database "INSERT INTO ``schueler-klasse``(sid, kid) VALUES ('$($studentDBid[0])', '$($classDBid[0])')"
-            }
             }
     }
 }
 }
 
-function addClassAndGetId {
+function addClass {
     param (
-        [int]$studentDBid,
+        $studentDBid,
         [string]$classname
     )
     if($classname){
         try {
-            $class = runSql $database "select * from klasse where klassenbezeichnung = $($classname)"
+            $querr ="select * from klasse where klassenbezeichnung = '$($classname)'"
+            $class = runSql $database $querr
         }
         catch {
             $class
         }
         if (!$class) {
             runSql $database "INSERT INTO klasse(klassenbezeichnung) VALUES ('$($classname)')"
+            log "new class created name: $($classname)" "INFO"
             $classDBid = runSql $database "SELECT LAST_INSERT_ID()"
         }
         else {
             $classDBid = $class[0]
         }
         runSql $database "INSERT INTO ``schueler-klasse``(sid, kid) VALUES ('$($studentDBid[0])', '$($classDBid[0])')"
+        log "student addet to class, student: $studentDBid, class: $classDBid"
     }
     
 }
