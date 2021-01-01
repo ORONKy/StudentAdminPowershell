@@ -66,7 +66,7 @@ function addClass {
         }
         #test studentDBid
         runSql $database "INSERT INTO ``schueler-klasse``(sid, kid) VALUES ('$($studentDBid[0])', '$($classDBid[0])')"
-        log "student addet to class, student: $studentDBid, class: $classDBid" "INFO"
+        log "student addet to class, student: $($studentDBid[0]), class: $classDBid" "INFO"
     }
     
 }

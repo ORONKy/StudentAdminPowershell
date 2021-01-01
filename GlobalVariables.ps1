@@ -1,3 +1,5 @@
 $GlobalLogPath = ".\logs\"
 $GlobalXmlPath = ".\ressources\gibsso_AD-Export.xml"
 $GlobalDatabaseName = "m122projekt"
+$GlobalStudentOUPath = "OU=Lernende,OU=GIBS,DC=alvaro,DC=local"
+$GlobalFirstStudentPassword = "gibs2020"
