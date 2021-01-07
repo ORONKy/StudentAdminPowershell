@@ -8,11 +8,14 @@ function createAdGroups {
     $classes = runSql $GlobalDatabaseName "SELECT * FROM klasse" 
     foreach($class in $classes){
         $groupName = "GISO_"+$class[1]
-        $groupExisting = Get-ADGroup -Identity $groupName -Filter "DistinguishedName -eq $($GlobalGroupOUPath)"
+        $groupExisting = Get-ADGroup -Filter "DistinguishedName -eq '$($GlobalGroupOUPath)' -AND Name -eq '$groupName'"
         if (!$groupExisting) {
-            New-ADGroup -Name $groupName -Path $GlobalGroupOUPath 
+            $groupName
+            $GlobalGroupOUPath
+            New-ADGroup -Name $groupName -Path $GlobalGroupOUPath -GroupScope "Global"
+            log "ad group created, name: $groupName" "INFO"
         }
     }
-
-
 }
+
+createAdGroups
