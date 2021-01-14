@@ -17,7 +17,7 @@ function deactivateDeletedStudents {
             }
         }
         if (!$isUserInADAndInDB) {
-            Disable-ADAccount -Identity $adName 
+            Disable-ADAccount -Identity $adName -Filter ""
         }
     }
 }
@@ -26,7 +26,23 @@ function deleteDeletedGroups {
     param (
         
     )
+   $adGroups = Get-ADGroup -Filter * -SearchBase $GlobalGroupOUPath
+   $dbGroups = runSql $GlobalDatabaseName "SELECT * FROM Klasse"
+
+   foreach($adGroup in $adGroups){
+    $adName = $adGroup.Name
+    [bool]$isGroupInADAndInDB = 0
+    foreach($dbGroup in $dbGroups ){
+        if ($adName -eq $dbGroup[1]) {
+            $isGroupInADAndInDB = 1
+        }
+    }
+    if (!$isGroupInADAndInDB) {
+        Remove-ADGroup -Identity $adName 
+    }
+}
     
 }
 
+deleteDeletedGroups
 deactivateDeletedStudents
