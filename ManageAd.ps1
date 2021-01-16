@@ -17,7 +17,7 @@ function deactivateDeletedStudents {
             }
         }
         if (!$isUserInADAndInDB) {
-            Disable-ADAccount -Identity $adName -Filter ""
+            Disable-ADAccount -Identity $adName
         }
     }
 }
@@ -39,7 +39,7 @@ function deleteDeletedGroups {
     }
     if (!$isGroupInADAndInDB) {
         ##search scope added
-        Remove-ADGroup -Identity $adName -SearchScope $GlobalGroupOUPath
+        Get-ADGroup -Identity $adName | Remove-ADGroup
     }
 }
    

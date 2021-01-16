@@ -71,5 +71,16 @@ function addClass {
     
 }
 
+function clearDbTables
+{
+    param (
+    )
+    $tables = @("``lehrer-fach-klasse``","``schueler-klasse``", "lehrer", "fach", "klasse", "schueler")
+    foreach($table in $tables){
+        runSql $GlobalDatabaseName "DELETE FROM $table"
+    }
+    log "tables cleared, tables: $tables" "INFO"
+}
+clearDbTables
 $scoolData = readXml
 importSchuelerToDB $scoolData "m122projekt"

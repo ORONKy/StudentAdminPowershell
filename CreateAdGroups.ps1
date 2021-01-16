@@ -10,7 +10,6 @@ function createAdGroups {
         $groupName = "GISO_"+$class[1]
         $groupExisting = Get-ADGroup -Filter "DistinguishedName -eq '$($GlobalGroupOUPath)' -AND Name -eq '$groupName'"
         if (!$groupExisting) {
-            $groupName
             $GlobalGroupOUPath
             New-ADGroup -Name $groupName -Path $GlobalGroupOUPath -GroupScope "Global"
             log "ad group created, name: $groupName" "INFO"

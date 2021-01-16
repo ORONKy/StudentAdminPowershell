@@ -115,13 +115,12 @@ function getCoursDBid {
 function clearTable {
     param (
     )
-    $tables = @("``lehrer-fach-klasse``", "lehrer", "fach", "klasse")
+    $tables = @("``lehrer-fach-klasse``","``schueler-klasse``", "lehrer", "fach", "klasse", "schuler")
     foreach($table in $tables){
         runSql $GlobalDatabaseName "DELETE FROM $table"
     }
-    
+    log "tables cleared, tables: $tables" "INFO"
 }
 $xml = readXml
 
-clearTable
 importTeacher $xml
