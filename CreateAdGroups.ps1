@@ -1,6 +1,6 @@
 . .\GlobalVariables.ps1
 . .\MySQL.ps1
-
+. .\Logger.ps1
 function createAdGroups {
     param (
         

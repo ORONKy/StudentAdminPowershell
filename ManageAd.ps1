@@ -38,10 +38,26 @@ function deleteDeletedGroups {
         }
     }
     if (!$isGroupInADAndInDB) {
-        Remove-ADGroup -Identity $adName 
+        ##search scope added
+        Remove-ADGroup -Identity $adName -SearchScope $GlobalGroupOUPath
     }
 }
-    
+   
+}
+
+function addUserToGroup {
+    param (
+    )
+            $querry = "SELECT schueler.username, klasse.klassenbezeichnung FROM schueler
+            INNER JOIN `schueler-klasse` ON schueler.sid = `schueler-klasse`.sid
+            INNER JOIN klasse ON klasse.kid = `schueler-klasse`.kid"
+            $dbStudentGroupNameAssigne = runSql $GlobalDatabaseName $querry
+            foreach($assigne in $dbStudentGroupNameAssigne)
+            {
+                $adUser = GET-ADUser -Identity $assigne[0] -SearchScope $GlobalStudentOUPath
+                Get-ADGroup -Identity $assigne[1] -SearchScope $GlobalGroupOUPath | Add-ADGroupMember $adUser
+            }
+
 }
 
 deleteDeletedGroups

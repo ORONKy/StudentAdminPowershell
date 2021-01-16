@@ -1,6 +1,7 @@
 . .\GlobalVariables.ps1
 . .\Logger.ps1
 . .\ReadXml.ps1
+. .\MySQL.ps1
 
 function importTeacher {
     param (
@@ -9,7 +10,7 @@ function importTeacher {
     $teachers =$xmlList.ad.lehrer
     foreach($teacher in $teachers){
         
-        if (!(isTeacherInDB $teacher.id)) {
+        if (!(isTeacherInDB $teacher.id) -and $teacher.status -eq 1) {
             $querry = "INSERT INTO lehrer(username, id, name , vorname, geburtsdatum, kuerzel, mail) VALUES('$($teacher.username)', '$($teacher.id)', '$($teacher.name)', '$($teacher.vorname)', '$($teacher.geburtsdatum)', '$($teacher.kuerzel)', '$($teacher.mail)')"
             runSql $GlobalDatabaseName $querry
             $teacherDBid = runSql $GlobalDatabaseName "SELECT LAST_INSERT_ID()"
@@ -48,17 +49,25 @@ function classTeacherCoursAssign {
         $coursShort = $cours.kurs_kuerzel
         [bool]$isCourseInClass = $false
         foreach($class in $classes){
-            if($coursShort.contains($class.klasse_kuerzel)){
-                $isCourseInClass = $true
+            if($coursShort -match $class.klasse_kuerzel){
+                $coursDBid = getCoursDBid $cours.kurs_bezeichnung
+                $classDBid = getClassDBid $class.klasse_kuerzel
+                $querry = "INSERT INTO ``lehrer-fach-klasse``(fid, kid, lid) VALUES ('$($coursDBid)', '$classDBid', '$teacherDBid')"
+                runSql $GlobalDatabaseName $querry
+                log "new cours_class_teacher_assign, coursid:$coursDBid, classid:$classDBid, teacherid:$teacherDBid" "INFO"
             }
+            break
         }
-        if ($isCourseInClass) {
-            $coursDBid = getCoursDBid $coursShort
-            $classDBid = getClassDBid $class.klasse_kuerzel
-            $querry = "INSERT INTO ``lehrer-fach-klasse``(fid, kid, lid) VALUES ('$($coursDBid)', '$classDBid', '$teacherDBid')"
-            runSql $GlobalDatabaseName $querry
-            log "new cours_class_teacher_assign, coursid:$coursDBid, classid:$classDBid, teacherid:$teacherDBid" "INFO"
-        }
+        # if ($isCourseInClass) {
+        #     $coursDBid = getCoursDBid $classDBid.kurs_bezeichnung
+        #     $classDBid = getClassDBid $class.klasse_kuerzel
+        #     $querry = "INSERT INTO ``lehrer-fach-klasse``(fid, kid, lid) VALUES ('$($coursDBid)', '$classDBid', '$teacherDBid')"
+        #     if (!(isAssigne $coursDBid, $classDBid, $teacherDBid)) {
+        #         runSql $GlobalDatabaseName $querry
+        #         log "new cours_class_teacher_assign, coursid:$coursDBid, classid:$classDBid, teacherid:$teacherDBid" "INFO"
+
+        #     }
+        # }
     }
 }
 
@@ -95,7 +104,7 @@ function getCoursDBid {
     }
     if (!$cours) {
         runSql $GlobalDatabaseName "INSERT INTO fach(fachbezeichnung) VALUES('$coursShort')"
-        log "Cours added, classname:$coursShort" "INFO"
+        log "Cours added, coursname:$coursShort" "INFO"
         $coursDBid = runSql $GlobalDatabaseName "SELECT LAST_INSERT_ID()"
     }else {
         $coursDBid = $cours[0]
@@ -103,6 +112,16 @@ function getCoursDBid {
     return $coursDBid[0]
 }
 
+function clearTable {
+    param (
+    )
+    $tables = @("``lehrer-fach-klasse``", "lehrer", "fach", "klasse")
+    foreach($table in $tables){
+        runSql $GlobalDatabaseName "DELETE FROM $table"
+    }
+    
+}
 $xml = readXml
 
+clearTable
 importTeacher $xml
