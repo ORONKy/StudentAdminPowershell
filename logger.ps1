@@ -12,9 +12,5 @@ function log {
         [string]$type
     )
 
-    [pscustomobject]@{
-        Time = (Get-Date -f g)
-        Type = $type
-        Message = $Message
-    } | Export-Csv -Path $GlobalLogPath"\LogFile.csv" -Append
+    "$(Get-Date -f g) [$type] $Message" | Out-File -FilePath $GlobalLogPath"\LogFile.log" -Append
 }

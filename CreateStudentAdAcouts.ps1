@@ -10,7 +10,7 @@ function createAdStudent {
     $students = runSql $GlobalDatabaseName "SELECT * FROM schueler"
     foreach($student in $students){
         $username = $student[1]
-        $wthf = isAdUserExisting $username
+        [bool]$wthf = isAdUserExisting $username
         $wthf.class
         if (-Not $wthf) {
             $password = ConvertTo-SecureString  $GlobalFirstStudentPassword

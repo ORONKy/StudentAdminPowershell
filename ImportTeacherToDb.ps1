@@ -7,7 +7,7 @@ function importTeacher {
     param (
         [xml]$xmlList
     )
-    $teachers =$xmlList.ad.lehrer
+    $teachers =$xmlList.ad.lehrer | Where-Object status -ne 0
     foreach($teacher in $teachers){
         
         if (!(isTeacherInDB $teacher.id) -and $teacher.status -eq 1) {
