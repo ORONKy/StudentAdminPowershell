@@ -56,7 +56,7 @@ function classTeacherCoursAssign {
                 runSql $GlobalDatabaseName $querry
                 log "new cours_class_teacher_assign, coursid:$coursDBid, classid:$classDBid, teacherid:$teacherDBid" "INFO"
             }
-            break
+           ##BREAK REMOVED
         }
         # if ($isCourseInClass) {
         #     $coursDBid = getCoursDBid $classDBid.kurs_bezeichnung
