@@ -12,7 +12,8 @@ function deactivateDeletedStudents {
         $adName = $adStudent.Name
         [bool]$isUserInADAndInDB = 0
         foreach($dbStudent in $dbStudents ){
-            if ($adName -eq $dbStudent[1]) {
+            $dbStudentMax20 = $dbStudent[1].subString(0,20)
+            if ($adName -eq $dbStudentMax20) {
                 $isUserInADAndInDB = 1
             }
         }
@@ -33,7 +34,8 @@ function deleteDeletedGroups {
     $adName = $adGroup.Name
     [bool]$isGroupInADAndInDB = 0
     foreach($dbGroup in $dbGroups ){
-        if ($adName -eq $dbGroup[1]) {
+        $dbToAdName= "GISO_$($dbGroup[1])"
+        if ($adName -eq $dbToAdName) {
             $isGroupInADAndInDB = 1
         }
     }
@@ -57,16 +59,15 @@ function addUserToGroup {
                 $adUser = GET-ADUser -Identity $assigne[0] -SearchScope $GlobalStudentOUPath
                 Get-ADGroup -Identity $assigne[1] -SearchScope $GlobalGroupOUPath | Add-ADGroupMember $adUser
             }
-
-            
-
-
 }
 
 function removeOldAdGroupsFromStudent {
     param (
-        $dbStudentGroupAssigne
     )
+    $querry = "SELECT schueler.username, klasse.klassenbezeichnung FROM schueler
+    INNER JOIN `schueler-klasse` ON schueler.sid = `schueler-klasse`.sid
+    INNER JOIN klasse ON klasse.kid = `schueler-klasse`.kid"
+    $dbStudentGroupAssigne = runSql $GlobalDatabaseName $querry
     $dbStudents = runSql $GlobalDatabaseName "SELECT username FROM schueler"
     foreach($dbStudent in $dbStudents){
         $currentlyGroupMember = Get-ADPrincipalGroupMembership -Identity $dbStudent[1]
@@ -102,3 +103,4 @@ function removeEmptyGroups {
 
 deleteDeletedGroups
 deactivateDeletedStudents
+removeOldAdGroupsFromStudent
