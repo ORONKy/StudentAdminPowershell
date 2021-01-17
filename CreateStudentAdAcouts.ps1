@@ -10,11 +10,10 @@ function createAdStudent {
     $students = runSql $GlobalDatabaseName "SELECT * FROM schueler"
     foreach($student in $students){
         $username = $student[1]
-        [bool]$wthf = isAdUserExisting $username
-        $wthf.class
-        if (-Not $wthf) {
-            $password = ConvertTo-SecureString  $GlobalFirstStudentPassword
-            New-ADUser -Name $username -AccountPassword $password -Path $GlobalStudentOUPath -DisplayName $username
+        $wthf = isAdUserExisting $username
+        if ($wthf[1] -eq 0) {
+            $password = ConvertTo-SecureString $GlobalFirstStudentPassword -AsPlainText -Force
+            New-ADUser -AccountPassword $password -Path $GlobalStudentOUPath -Name $username -Surname $student[3] -GivenName $student[4]
             log "New AD user created, name: $username"
         }
     }
@@ -25,9 +24,6 @@ function isAdUserExisting {
         $identity
     )
 
-    [bool]$tru = 1
-    [bool]$fls = 0
-
     try {
         $user = Get-AdUser -Identity $identity
     }
@@ -35,9 +31,9 @@ function isAdUserExisting {
         $user
     }
     if ($user) {
-       return [bool]$fls
+       return [int]1
     }
-    return [bool]$true
+    return [int]0
 }
 
 createAdStudent

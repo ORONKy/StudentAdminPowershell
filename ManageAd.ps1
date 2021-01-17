@@ -58,7 +58,47 @@ function addUserToGroup {
                 Get-ADGroup -Identity $assigne[1] -SearchScope $GlobalGroupOUPath | Add-ADGroupMember $adUser
             }
 
+            
+
+
 }
+
+function removeOldAdGroupsFromStudent {
+    param (
+        $dbStudentGroupAssigne
+    )
+    $dbStudents = runSql $GlobalDatabaseName "SELECT username FROM schueler"
+    foreach($dbStudent in $dbStudents){
+        $currentlyGroupMember = Get-ADPrincipalGroupMembership -Identity $dbStudent[1]
+        [bool]$isAdGroupInDB = $false
+        foreach($group in $currentlyGroupMember)
+        {
+            foreach($dbGroup in ($dbStudentGroupAssigne | Where-Object $_[0] -eq $dbStudent[1]))
+            {            
+                if ($group.name -eq $dbGroup[1]) {
+                    $isAdGroupInDB = $true
+                }
+            }
+
+        }
+        if (!$isAdGroupInDB) {
+            $adMember = Get-ADUser -Identity $dbStudent[1]
+            $group | Remove-ADGroupMember -Members $adMember
+        }
+    }
+}
+
+function removeEmptyGroups {
+    param (
+    )
+    Get-ADGroup -SearchBase $GlobalGroupOUPath | ForEach-Object {
+        if (($_ | Get-ADGroupMember).size() -eq 0  ) {
+            $_ | Remove-ADGroup
+        }
+    }
+}
+
+
 
 deleteDeletedGroups
 deactivateDeletedStudents
