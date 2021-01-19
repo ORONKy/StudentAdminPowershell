@@ -20,6 +20,7 @@ function deactivateDeletedStudents {
             
             if ($adName -eq $dbStudentMax20) {
                 $isUserInADAndInDB = 1
+                break
             }
         }
         if (!$isUserInADAndInDB) {
