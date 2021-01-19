@@ -10,14 +10,15 @@ function createAdStudent {
     $students = runSql $GlobalDatabaseName "SELECT * FROM schueler"
     foreach($student in $students){
         $username = $student[1]
+        $usernameMax20 = $username
         if ($username.length -gt 20) {
-            $username = $username.subString(0,20)
+            $usernameMax20 = $username.subString(0,20)
         }
         $wthf = isAdUserExisting $username
         if ($wthf[1] -eq 0) {
             $password = ConvertTo-SecureString $GlobalFirstStudentPassword -AsPlainText -Force
             try {
-                New-ADUser -AccountPassword $password -Path $GlobalStudentOUPath -Name $username -Surname $student[3] -GivenName $student[4] -Enabled $true
+                New-ADUser -AccountPassword $password -Path $GlobalStudentOUPath -Name $usernameMax20 -Surname $student[3] -GivenName $student[4] -Enabled $true -ServicePrincipalNames $username
             }
             catch {
                 log "cant create AD User, username: $username, error $_" "ERROR"
