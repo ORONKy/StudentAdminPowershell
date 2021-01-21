@@ -79,11 +79,16 @@ function removeOldAdGroupsFromStudent {
     )
     $dbStudents = runSql $GlobalDatabaseName "SELECT username FROM schueler"
     foreach($dbStudent in $dbStudents){
-        $currentlyGroupMember = Get-ADPrincipalGroupMembership -Identity $dbStudent[0]
+        try {
+            $currentlyGroupMember = Get-ADPrincipalGroupMembership -Identity $dbStudent[0]
+        }
+        catch {
+            
+        }
         [bool]$isAdGroupInDB = $false
         foreach($group in $currentlyGroupMember)
         {
-            if ($group.DistinguishedName -like "CN=$groupname, $GlobalGroupOUPath") {
+            if ($group.DistinguishedName -eq "CN=$groupname, $GlobalGroupOUPath") {
                 $querry = "SELECT schueler.username, klasse.klassenbezeichnung FROM schueler
                 INNER JOIN ``schueler-klasse`` ON schueler.sid = ``schueler-klasse``.sid
                 INNER JOIN klasse ON klasse.kid = ``schueler-klasse``.kid
@@ -96,8 +101,12 @@ function removeOldAdGroupsFromStudent {
                         $isAdGroupInDB = $true
                     }
                 }
-                if (!$isAdGroupInDB) {
-                    $adMember = Get-ADUser -Identity $dbStudent[0]
+                if (!$isAdGroupInDB -And -not($group.DistinguishedName -eq $GlobalGroundDC )) {
+                    $dbStudentMax20 = $dbStudent[1]      
+                    if ($dbStudentMax20.length -gt 20) {
+                        $dbStudentMax20 = $dbStudent[1].subString(0,20)
+                    }
+                    $adMember = Get-ADUser -Identity $dbStudentMax20
                     $group | Remove-ADGroupMember -Members $adMember
                 }
             }

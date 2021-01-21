@@ -18,7 +18,7 @@ function createAdStudent {
         if ($wthf[1] -eq 0) {
             $password = ConvertTo-SecureString $GlobalFirstStudentPassword -AsPlainText -Force
             try {
-                New-ADUser -AccountPassword $password -Path $GlobalStudentOUPath -Name $usernameMax20 -Surname $student[3] -GivenName $student[4] -Enabled $true -ServicePrincipalNames $username
+                New-ADUser -AccountPassword $password -Path $GlobalStudentOUPath -Name $usernameMax20 -Surname $student[3] -GivenName $student[4] -Enabled $true
             }
             catch {
                 log "cant create AD User, username: $username, error $_" "ERROR"
