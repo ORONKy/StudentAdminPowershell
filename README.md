@@ -4,7 +4,7 @@
 
 #Ad Management and import (DE)
 
-![Flowchart](https://imgur.com/jsXHFBp)
+![Flowchart](https://imgur.com/w8E907J.jpg)
 
 #Import of teacher (DE)
 
