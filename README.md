@@ -1,6 +1,6 @@
 # StudentAdminPowershell
 
-This was a School projekt it was somthing completly new because I never made something with Ad before.
+This was a school project it was something completely new as I have never done anything with ad
 
 ### flow chart
 
