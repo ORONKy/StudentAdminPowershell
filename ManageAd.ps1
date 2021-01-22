@@ -13,10 +13,7 @@ function deactivateDeletedStudents {
         $adName = $adStudent.Name
         [bool]$isUserInADAndInDB = 0
         foreach($dbStudent in $dbStudents ){
-            $dbStudentMax20 = $dbStudent[1]      
-            if ($dbStudentMax20.length -gt 20) {
-                $dbStudentMax20 = $dbStudent[1].subString(0,20)
-            }
+            $dbStudentMax20 = nameMax20Chars $dbStudent[1]
             
             if ($adName -eq $dbStudentMax20) {
                 $isUserInADAndInDB = 1
@@ -25,6 +22,7 @@ function deactivateDeletedStudents {
         }
         if (!$isUserInADAndInDB) {
             Disable-ADAccount -Identity $adName
+            log "account disabled, username: $adName" "INFO"
         }
     }
 }
@@ -47,7 +45,8 @@ function deleteDeletedGroups {
     }
     if (!$isGroupInADAndInDB) {
         ##search scope added
-        Get-ADGroup -Identity $adName | Remove-ADGroup
+        Get-ADGroup -Identity $adName | Remove-ADGroup -Confirm:$false
+        log "adGroup removed, name: $adName" "INFO"
     }
 }
    
@@ -63,7 +62,9 @@ function addUserToGroup {
             foreach($assigne in $dbStudentGroupNameAssigne)
             {
                 $groupname= "GISO_$($assigne[1])"
-                $adUser = GET-ADUser -Filter "Name -eq '$($assigne[0])'" -SearchBase $GlobalStudentOUPath                
+
+                $nameMax20 = nameMax20Chars $assigne[0]
+                $adUser = GET-ADUser -Filter "Name -eq '$nameMax20'" -SearchBase $GlobalStudentOUPath                
                 try {
                     Get-ADGroup -Filter "Name -eq '$groupname'" -SearchBase $GlobalGroupOUPath | Add-ADGroupMember -Members $adUser
                     log "user added to group, user: $($adUser.name), group: $groupname" "INFO"
@@ -80,7 +81,8 @@ function removeOldAdGroupsFromStudent {
     $dbStudents = runSql $GlobalDatabaseName "SELECT username FROM schueler"
     foreach($dbStudent in $dbStudents){
         try {
-            $currentlyGroupMember = Get-ADPrincipalGroupMembership -Identity $dbStudent[0]
+            $nameMax20 = nameMax20Chars $dbStudent[0]
+            $currentlyGroupMember = Get-ADPrincipalGroupMembership -Identity $nameMax20
         }
         catch {
             
@@ -88,7 +90,7 @@ function removeOldAdGroupsFromStudent {
         [bool]$isAdGroupInDB = $false
         foreach($group in $currentlyGroupMember)
         {
-            if ($group.DistinguishedName -eq "CN=$groupname, $GlobalGroupOUPath") {
+            if ($group.DistinguishedName -like "*$GlobalGroupOUPath") {
                 $querry = "SELECT schueler.username, klasse.klassenbezeichnung FROM schueler
                 INNER JOIN ``schueler-klasse`` ON schueler.sid = ``schueler-klasse``.sid
                 INNER JOIN klasse ON klasse.kid = ``schueler-klasse``.kid
@@ -102,16 +104,28 @@ function removeOldAdGroupsFromStudent {
                     }
                 }
                 if (!$isAdGroupInDB -And -not($group.DistinguishedName -eq $GlobalGroundDC )) {
-                    $dbStudentMax20 = $dbStudent[1]      
-                    if ($dbStudentMax20.length -gt 20) {
-                        $dbStudentMax20 = $dbStudent[1].subString(0,20)
-                    }
-                    $adMember = Get-ADUser -Identity $dbStudentMax20
-                    $group | Remove-ADGroupMember -Members $adMember
+                        $adMember = Get-ADUser -Identity $nameMax20
+                        Remove-ADGroupMember -Members $adMember -Identity $group.name -confirm:$false
+                        log "group removed from user, user: $nameMax20, group: $($group.name)"
                 }
             }
         }
     }
+}
+
+function nameMax20Chars {
+    param (
+        $name
+    )
+    if ($name.length -gt 20) {
+        $name = $name.subString(0,20)
+        if ($name -eq "dominiclucienjerome.") {
+        }
+        if ($name[19] -eq ".") {
+            $name = $name.subString(0,19)
+        }
+    }
+    return $name
 }
 
 function removeEmptyGroups {

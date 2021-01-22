@@ -13,6 +13,9 @@ function createAdStudent {
         $usernameMax20 = $username
         if ($username.length -gt 20) {
             $usernameMax20 = $username.subString(0,20)
+            if ($usernameMax20[19] -eq ".") {
+                $usernameMax20 = $username.subString(0,19)
+            }
         }
         $wthf = isAdUserExisting $username
         if ($wthf[1] -eq 0) {
